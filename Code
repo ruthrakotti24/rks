@@ -1,0 +1,53 @@
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+# Sample data (you can replace this with a database)
+doctors = [
+    {"id": 1, "name": "Dr. Smith", "specialization": "Cardiologist", "available_slots": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]},
+    {"id": 2, "name": "Dr. Johnson", "specialization": "Dermatologist", "available_slots": ["Monday", "Wednesday", "Friday"]},
+    # Add more doctors here
+]
+
+appointments = []
+
+# API endpoint for listing doctors
+@app.route("/doctors", methods=["GET"])
+def list_doctors():
+    return jsonify(doctors)
+
+# API endpoint for doctor detail
+@app.route("/doctors/<int:doctor_id>", methods=["GET"])
+def get_doctor(doctor_id):
+    doctor = next((d for d in doctors if d["id"] == doctor_id), None)
+    if doctor:
+        return jsonify(doctor)
+    else:
+        return "Doctor not found", 404
+
+# API endpoint for booking an appointment
+@app.route("/appointments", methods=["POST"])
+def book_appointment():
+    data = request.get_json()
+    doctor_id = data.get("doctor_id")
+    patient_name = data.get("patient_name")
+
+    doctor = next((d for d in doctors if d["id"] == doctor_id), None)
+    if not doctor:
+        return "Doctor not found", 404
+
+    # Check if the appointment date is valid (evening slot and not Sunday)
+    # You should implement this validation based on your requirements
+
+    appointment = {
+        "id": len(appointments) + 1,
+        "doctor_id": doctor_id,
+        "patient_name": patient_name,
+        # Add appointment date and time here
+    }
+
+    appointments.append(appointment)
+    return jsonify(appointment), 201
+
+if __name__ == "__main__":
+    app.run(debug=True)
